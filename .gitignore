@@ -1,0 +1,4 @@
+config.json
+migrations/*.sql
+/target
+**/*.rs.bk

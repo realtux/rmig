@@ -22,27 +22,35 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ***/
 
-use serde::{Deserialize, Serialize};
+use std::process;
+use std::fs::File;
+use std::io::Read;
 
-pub struct Flags {
-    // general
-    pub force: bool,
+use crate::structs::Config as Config;
 
-    // migrate
-    pub transaction: bool,
-    pub bail: bool
+pub fn load() -> Result<Config, &'static str> {
+    let mut handle = File::open("config.json")
+        .unwrap_or_else(|_| {
+            println!("config file not found");
+            process::exit(1);
+        });
+
+    let mut contents = String::new();
+
+    handle.read_to_string(&mut contents)
+        .unwrap_or_else(|_| {
+            println!("problem parsing config, recommend `rmig init -f` to redo");
+            process::exit(1);
+        });
+
+    let config: Config = serde_json::from_str(&contents).unwrap();
+
+    Ok(config)
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Config {
-    pub host: String,
-    pub port: i32,
-    pub user: String,
-    pub pass: String,
-    pub db: String,
-    pub platform: String
-}
-
-pub struct Migration {
-    pub name: String
+pub fn exists() -> bool {
+    match File::open("config.json") {
+        Ok(_) => true,
+        _ => false
+    }
 }

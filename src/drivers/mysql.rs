@@ -22,27 +22,34 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ***/
 
-use serde::{Deserialize, Serialize};
+use crate::config;
+use crate::structs::Migration as Migration;
 
-pub struct Flags {
-    // general
-    pub force: bool,
+pub fn do_query(query: String) -> Vec<Migration> {
+    let config = config::load().unwrap();
 
-    // migrate
-    pub transaction: bool,
-    pub bail: bool
-}
+    let conn_url = format!(
+        "mysql://{}:{}@{}:{}/{}",
+        config.user, config.pass,
+        config.host, config.port,
+        config.db
+    );
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Config {
-    pub host: String,
-    pub port: i32,
-    pub user: String,
-    pub pass: String,
-    pub db: String,
-    pub platform: String
-}
+    let pool = mysql::Pool::new(conn_url).unwrap();
 
-pub struct Migration {
-    pub name: String
+    let migrations: Vec<Migration> =
+        pool.prep_exec(query, ())
+            .map(|result| {
+                result
+                    .map(|x| x.unwrap())
+                    .map(|row| {
+                        let name = mysql::from_row(row);
+
+                        Migration { name }
+                    })
+                    .collect()
+            })
+            .unwrap();
+
+    migrations
 }

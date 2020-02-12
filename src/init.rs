@@ -22,10 +22,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ***/
 
-use std::path::Path;
 use text_io::read;
 use std::io::{stdout,Write};
 use std::fs;
+
+use crate::config;
 
 use crate::structs::Flags as Flags;
 use crate::structs::Config as Config;
@@ -33,14 +34,24 @@ use crate::structs::Config as Config;
 pub fn handle(flags: Flags) {
     println!("beginning init process..");
 
-    if Path::new("config.json").exists() {
-        println!("config already exists, use -f to force");
-        return;
+    if !flags.force {
+        if config::exists() {
+            println!("config already exists, use -f to force");
+            return;
+        }
     }
 
     print!("host [localhost]: ");
     let _ = stdout().flush();
     let host: String = read!("{}\n");
+
+    print!("port [3306]: ");
+    let _ = stdout().flush();
+    let port: String = read!("{}\n");
+    let port: i32 = match port.parse::<i32>() {
+        Ok(p) => p,
+        _ => 3306
+    };
 
     print!("database username [root]: ");
     let _ = stdout().flush();
@@ -54,19 +65,25 @@ pub fn handle(flags: Flags) {
     let _ = stdout().flush();
     let db: String = read!("{}\n");
 
-    print!("database platform: ");
-    print!("  [1] mysql");
-    print!("");
-    print!("choice: ");
+    println!("database platform:");
+    println!("  [1] mysql");
+    println!("");
+    print!("choice [1]: ");
+    let _ = stdout().flush();
 
     let platform: String = read!("{}\n");
-    let platform: &str = match platform.as_str() {
-        "1" => "mysql",
+    let platform: &'static str = match platform.parse::<i32>() {
+        Ok(platform) => {
+            match platform {
+                1 => "mysql",
+                _ => "mysql"
+            }
+        },
         _ => "mysql"
     };
     let platform: String = platform.to_string();
 
-    let mut config = Config { host, user, pass, db, platform };
+    let mut config = Config { host, port, user, pass, db, platform };
 
     if config.host == "" {
         config.host = "localhost".to_string();

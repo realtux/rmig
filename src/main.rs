@@ -1,22 +1,35 @@
+/***
+The MIT License (MIT)
+
+Copyright (c) 2020 Brian Seymour
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+***/
+
 use std::env;
-use std::path::Path;
-use text_io::read;
-use std::io::{stdout,Write};
-use serde::{Deserialize, Serialize};
 
-static FLAG_TRANSACTION: bool = false;
-static FLAG_BAIL: bool = false;
-
-#[derive(Serialize, Deserialize)]
-struct Config {
-    host: String,
-    user: String,
-    pass: String,
-    db: String
-}
+mod init;
+mod status;
+mod structs;
 
 fn main() {
-    println!("rmig 0.0.1");
+    println!("rmig 0.0.1 by tux");
 
     let args: Vec<String> = env::args().collect();
 
@@ -27,54 +40,42 @@ fn main() {
 
     let command: &str = &args[1];
 
-    if command == "init" {
-        println!("beginning init process...");
+    let mut force = false;
+    let mut transaction = false;
+    let mut bail = false;
 
-        if Path::new("config.json").exists() {
-            println!("config already exists");
-            return;
+    for arg in &args {
+        match command {
+            "init" => match arg.as_str() {
+                "-f" => force = true,
+                _ => {}
+            },
+            "migrate" => match arg.as_str() {
+                "-t" => transaction = true,
+                "-b" => bail = true,
+                _ => {}
+            },
+            _ => {}
         }
+    }
 
-        print!("host [localhost]: ");
-        let _ = stdout().flush();
-        let host: String = read!("{}\n");
+    let flags = structs::Flags {
+        force,
+        transaction,
+        bail
+    };
 
-        print!("db user [root]: ");
-        let _ = stdout().flush();
-        let user: String = read!("{}\n");
-
-        print!("db password [root]: ");
-        let _ = stdout().flush();
-        let pass: String = read!("{}\n");
-
-        print!("db name: ");
-        let _ = stdout().flush();
-        let db: String = read!("{}\n");
-
-        let mut config = Config { host, user, pass, db };
-
-        if config.host == "" {
-            config.host = "localhost".to_string();
-        }
-
-        if config.user == "" {
-            config.user = "root".to_string();
-        }
-
-        if config.pass == "" {
-            config.pass = "root".to_string();
-        }
-
-        let config_string = serde_json::to_string(&config).unwrap();
-
-        println!("{}", config_string);
+    match command {
+        "init" => init::handle(flags),
+        "status" => status::handle(flags),
+        _ => menu()
     }
 }
 
 fn menu() {
     println!("usage: rmig command");
     println!("    init");
-    println!("        create the initial bmig structure and config");
+    println!("        create the initial rmig structure and config");
     println!("");
     println!("    status");
     println!("        see the status of all migrations");

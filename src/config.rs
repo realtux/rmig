@@ -26,7 +26,7 @@ use std::process;
 use std::fs::File;
 use std::io::Read;
 
-use crate::structs::Config as Config;
+use crate::structs::Config;
 
 pub fn load() -> Result<Config, &'static str> {
     let mut handle = File::open("config.json")

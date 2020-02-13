@@ -22,15 +22,76 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ***/
 
-use std::path::Path;
+use std::fs;
+use std::io;
+use termion::{color, style};
 
-use crate::structs::Flags as Flags;
-use crate::structs::Config as Config;
+use crate::drivers::interface;
+use crate::structs::Flags;
 
-pub fn handle(flags: Flags) {
-    if !Path::new("config.json").exists() {
-        println!("you must generate a config file first");
-        println!("use `rmig init` to do this");
-        return;
+struct File {
+    name: String,
+    ran: bool
+}
+
+pub fn handle(_flags: Flags) {
+    let migrations = interface::query("select * from zzzzzbmigmigrations".to_string());
+
+    let mut files = fs::read_dir("migrations")
+        .unwrap()
+        .map(|result| {
+            result.map(|file| {
+                file.path()
+            })
+        })
+        .collect::<Result<Vec<_>, io::Error>>()
+        .unwrap();
+
+    files.sort();
+
+    let mut local_migrations: Vec<File> = Vec::new();
+
+    for file in files {
+        let name = file.file_name().unwrap().to_str().unwrap();
+
+        if name.starts_with('.') {
+            continue;
+        }
+
+        let mut ran = false;
+
+        for migration in &migrations {
+            if migration.name == name.to_string() {
+                ran = true;
+            }
+        }
+
+        local_migrations.push(File {
+            name: name.to_string(),
+            ran
+        });
+    }
+
+    let mut pending_migrations = 0;
+
+    for migration in local_migrations {
+        if migration.ran {
+            println!("{}up -{} {}",
+                color::Fg(color::Green), style::Reset, migration.name);
+        } else {
+            pending_migrations += 1;
+
+            println!("{}dn -{} {}",
+                color::Fg(color::Red), style::Reset, migration.name);
+        }
+    }
+
+    if pending_migrations > 0 {
+        println!(
+            "you have {} pending migration{}, run `rmig migrate` to apply {}",
+            pending_migrations,
+            if pending_migrations == 1 { "" } else { "s" },
+            if pending_migrations == 1 { "it" } else { "them" }
+        );
     }
 }

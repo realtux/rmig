@@ -22,12 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ***/
 
-use crate::config;
+use crate::structs::Config as Config;
 use crate::structs::Migration as Migration;
 
-pub fn do_query(query: String) -> Vec<Migration> {
-    let config = config::load().unwrap();
-
+pub fn query(config: Config, query: String) -> Vec<Migration> {
     let conn_url = format!(
         "mysql://{}:{}@{}:{}/{}",
         config.user, config.pass,

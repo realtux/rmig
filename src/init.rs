@@ -25,6 +25,7 @@ THE SOFTWARE.
 use text_io::read;
 use std::io::{stdout,Write};
 use std::fs;
+use std::process;
 
 use crate::config;
 
@@ -37,7 +38,7 @@ pub fn handle(flags: Flags) {
     if !flags.force {
         if config::exists() {
             println!("config already exists, use -f to force");
-            return;
+            process::exit(1);
         }
     }
 

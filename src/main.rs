@@ -22,10 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ***/
 
-#[macro_use]
 extern crate mysql;
 extern crate serde;
 extern crate serde_json;
+extern crate termion;
 
 use std::env;
 
@@ -37,12 +37,6 @@ mod structs;
 
 fn main() {
     println!("rmig 0.0.1 by tux");
-
-    //let migrations = drivers::mysql::do_query("select * from zzzzzbmigmigrations".to_string());
-
-    //for migration in migrations {
-    //    println!("name: {}", migration.name);
-    //}
 
     let args: Vec<String> = env::args().collect();
 
@@ -83,6 +77,8 @@ fn main() {
         "status" => status::handle(flags),
         _ => menu()
     }
+
+    println!("");
 }
 
 fn menu() {

@@ -22,8 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ***/
 
-use crate::structs::Config as Config;
-use crate::structs::Migration as Migration;
+use crate::structs::Config;
+use crate::structs::Migration;
 
 pub fn query(config: Config, query: String) -> Vec<Migration> {
     let conn_url = format!(

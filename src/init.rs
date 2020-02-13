@@ -29,8 +29,8 @@ use std::process;
 
 use crate::config;
 
-use crate::structs::Flags as Flags;
-use crate::structs::Config as Config;
+use crate::structs::Flags;
+use crate::structs::Config;
 
 pub fn handle(flags: Flags) {
     println!("beginning init process..");

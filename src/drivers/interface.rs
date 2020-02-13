@@ -2,7 +2,7 @@ use std::process;
 
 use crate::config;
 use crate::drivers::mysql;
-use crate::structs::Migration as Migration;
+use crate::structs::Migration;
 
 pub fn query(query: String) -> Vec<Migration> {
     if !config::exists() {

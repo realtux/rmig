@@ -26,7 +26,7 @@ use serde::{Deserialize, Serialize};
 
 pub struct Flags {
     // general
-    pub force: bool,
+    pub force: bool, // used in init
 
     // migrate
     pub transaction: bool,

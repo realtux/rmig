@@ -1,7 +1,9 @@
 # rmig 0.0.1 by [tux](https://github.com/realtux)
 
-rmig is a re-implementation (and re-imagination) of an old c project in rust. this project aims to be
-a generic database migrations manager which will support several platforms, but mysql at first.
+rmig is a re-implementation (and re-imagination) of an [old c project](https://github.com/realtux/bmig) which handled
+mysql migrations.
+it shores up any lingering problems from the previous project and builds upon it with newer features.
+this project, like the previous one, aims to be a generic database migrations manager which will support several platforms, but mysql at first.
 
 ---
 

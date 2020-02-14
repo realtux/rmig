@@ -22,30 +22,28 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ***/
 
-use crate::structs::Config;
+use crate::config;
 use crate::structs::Migration;
 
 use std::sync::Mutex;
 
 lazy_static! {
-    static ref CONNECTION: Mutex<Vec<mysql::Conn>> = Mutex::new(vec![]);
+    static ref CONNECTION: Mutex<Box<mysql::Conn>> = {
+        let config = config::load().unwrap();
+
+        let conn_url = format!(
+            "mysql://{}:{}@{}:{}/{}",
+            config.user, config.pass,
+            config.host, config.port,
+            config.db
+        );
+
+        Mutex::new(Box::new(mysql::Conn::new(conn_url).unwrap()))
+    };
 }
 
-fn init_connection(config: &Config) {
-    if CONNECTION.lock().unwrap().len() == 1 {
-        return
-    }
-
-    let conn_url = format!(
-        "mysql://{}:{}@{}:{}/{}",
-        config.user, config.pass,
-        config.host, config.port,
-        config.db
-    );
-
-    CONNECTION.lock().unwrap().push(mysql::Conn::new(conn_url).unwrap());
-
-    let conn = &mut CONNECTION.lock().unwrap()[0];
+fn init_connection() {
+    let conn = &mut CONNECTION.lock().unwrap();
 
     // backwards compatibility for bmig users
     let _ = conn.query("rename table zzzzzbmigmigrations to rmig");
@@ -58,10 +56,10 @@ fn init_connection(config: &Config) {
         )engine=innodb default charset=utf8");
 }
 
-pub fn query(config: Config, query: String) -> Vec<Migration> {
-    init_connection(&config);
+pub fn query(query: String) -> Vec<Migration> {
+    init_connection();
 
-    let conn = &mut CONNECTION.lock().unwrap()[0];
+    let conn = &mut CONNECTION.lock().unwrap();
 
     // query and map results into a vec of migrations
     let migrations: Vec<Migration> =

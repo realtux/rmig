@@ -22,6 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ***/
 
+#[macro_use]
+extern crate lazy_static;
+extern crate chrono;
 extern crate mysql;
 extern crate serde;
 extern crate serde_json;
@@ -30,6 +33,7 @@ extern crate termion;
 use std::env;
 
 mod config;
+mod create;
 mod drivers;
 mod init;
 mod status;
@@ -74,7 +78,8 @@ fn main() {
 
     match command {
         "init" => init::handle(flags),
-        "status" => status::handle(flags),
+        "status" => status::handle(),
+        "create" => create::handle(args),
         _ => menu()
     }
 

@@ -27,15 +27,14 @@ use std::io;
 use termion::{color, style};
 
 use crate::drivers::interface;
-use crate::structs::Flags;
 
 struct File {
     name: String,
     ran: bool
 }
 
-pub fn handle(_flags: Flags) {
-    let migrations = interface::query("select * from zzzzzbmigmigrations".to_string());
+pub fn handle() {
+    let migrations = interface::query("select * from rmig".to_string());
 
     let mut files = fs::read_dir("migrations")
         .unwrap()

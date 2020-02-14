@@ -37,7 +37,7 @@ pub fn handle(flags: Flags) {
 
     if !flags.force {
         if config::exists() {
-            println!("config already exists, use -f to force");
+            println!("config already exists, use -f to force/overwrite");
             process::exit(1);
         }
     }
@@ -101,5 +101,5 @@ pub fn handle(flags: Flags) {
     let config_string = serde_json::to_string_pretty(&config).unwrap();
 
     fs::write("config.json", config_string)
-        .expect("problem writing config");
+        .expect("problem creating new config file");
 }

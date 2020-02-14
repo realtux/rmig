@@ -22,35 +22,39 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ***/
 
+use std::fs;
 use std::process;
-use std::fs::File;
-use std::io::Read;
 
-use crate::structs::Config;
+use chrono::Local;
 
-pub fn load() -> Result<Config, &'static str> {
-    let mut handle = File::open("config.json")
-        .unwrap_or_else(|_| {
-            println!("config file not found, use `rmig init` to make one");
-            process::exit(1);
-        });
-
-    let mut contents = String::new();
-
-    handle.read_to_string(&mut contents)
-        .unwrap_or_else(|_| {
-            println!("problem parsing config, recommend `rmig init -f` to redo");
-            process::exit(1);
-        });
-
-    let config: Config = serde_json::from_str(&contents).unwrap();
-
-    Ok(config)
-}
-
-pub fn exists() -> bool {
-    match File::open("config.json") {
-        Ok(_) => true,
-        _ => false
+pub fn handle(args: Vec<String>) {
+    // check for missing args for the migration
+    if args.len() < 3 {
+        println!("you must supply a name for your migration\n");
+        process::exit(1);
     }
+
+    let date = Local::now();
+
+    let mut filename: String = date.format("%Y%m%d%H%M%S").to_string();
+
+    filename.push_str("-");
+
+    let mut processed = 0;
+
+    // concatenate each arg with a dash
+    for arg in &args[2..] {
+        filename.push_str(arg);
+        processed += 1;
+
+        if processed + 2 != args.len() {
+            filename.push_str("-");
+        }
+    }
+
+    filename.push_str(".sql");
+
+    // desired output is 00000000000000-arg1-arg2-arg3-arg4.sql
+    fs::write(format!("migrations/{}", filename), "up:\n\n\ndown:\n\n")
+        .expect("problem creating new migration");
 }

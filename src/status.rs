@@ -24,7 +24,9 @@ THE SOFTWARE.
 
 use std::fs;
 use std::io;
-use termion::{color, style};
+use std::io::{stdout, Write};
+use crossterm::execute;
+use crossterm::style::{Color, Print, ResetColor, SetForegroundColor};
 
 use crate::drivers::interface;
 
@@ -75,13 +77,25 @@ pub fn handle() {
 
     for migration in local_migrations {
         if migration.ran {
-            println!("{}up -{} {}",
-                color::Fg(color::Green), style::Reset, migration.name);
+            let _ = execute!(
+                stdout(),
+                SetForegroundColor(Color::Green),
+                Print("up - "),
+                ResetColor,
+                Print(migration.name),
+                Print("\n")
+            );
         } else {
             pending_migrations += 1;
 
-            println!("{}dn -{} {}",
-                color::Fg(color::Red), style::Reset, migration.name);
+            let _ = execute!(
+                stdout(),
+                SetForegroundColor(Color::Red),
+                Print("dn - "),
+                ResetColor,
+                Print(migration.name),
+                Print("\n")
+            );
         }
     }
 

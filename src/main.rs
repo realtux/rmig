@@ -28,7 +28,7 @@ extern crate chrono;
 extern crate mysql;
 extern crate serde;
 extern crate serde_json;
-extern crate termion;
+extern crate crossterm;
 
 use std::env;
 

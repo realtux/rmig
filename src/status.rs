@@ -28,50 +28,11 @@ use std::io::{stdout, Write};
 use crossterm::execute;
 use crossterm::style::{Color, Print, ResetColor, SetForegroundColor};
 
+use crate::structs::Migration;
 use crate::drivers::interface;
 
-struct File {
-    name: String,
-    ran: bool
-}
-
 pub fn handle() {
-    let migrations = interface::query("select * from rmig".to_string());
-
-    let mut files = fs::read_dir("migrations")
-        .unwrap()
-        .map(|result| {
-            result.map(|file| {
-                file.path()
-            })
-        })
-        .collect::<Result<Vec<_>, io::Error>>()
-        .unwrap();
-
-    files.sort();
-
-    let mut local_migrations: Vec<File> = Vec::new();
-
-    for file in files {
-        let name = file.file_name().unwrap().to_str().unwrap();
-
-        if name.starts_with('.') {
-            continue;
-        }
-
-        let mut ran = false;
-
-        for migration in &migrations {
-            if migration.name == name.to_string() {
-                ran = true;
-            }
-        }
-
-        local_migrations.push(File {
-            name: name.to_string(),
-            ran
-        });
-    }
+    let local_migrations = migration_status();
 
     let mut pending_migrations = 0;
 
@@ -107,4 +68,45 @@ pub fn handle() {
             if pending_migrations == 1 { "it" } else { "them" }
         );
     }
+}
+
+pub fn migration_status() -> Vec<Migration> {
+    let migrations = interface::get_migration_list();
+
+    let mut files = fs::read_dir("migrations")
+        .unwrap()
+        .map(|result| {
+            result.map(|file| {
+                file.path()
+            })
+        })
+        .collect::<Result<Vec<_>, io::Error>>()
+        .unwrap();
+
+    files.sort();
+
+    let mut local_migrations: Vec<Migration> = Vec::new();
+
+    for file in files {
+        let name = file.file_name().unwrap().to_str().unwrap();
+
+        if name.starts_with('.') {
+            continue;
+        }
+
+        let mut ran = false;
+
+        for migration in &migrations {
+            if migration.name == name.to_string() {
+                ran = true;
+            }
+        }
+
+        local_migrations.push(Migration {
+            name: name.to_string(),
+            ran
+        });
+    }
+
+    local_migrations
 }

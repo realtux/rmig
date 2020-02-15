@@ -30,7 +30,9 @@ pub struct Flags {
 
     // migrate
     pub transaction: bool,
-    pub bail: bool
+
+    // rollback
+    pub all: bool
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -44,5 +46,6 @@ pub struct Config {
 }
 
 pub struct Migration {
-    pub name: String
+    pub name: String,
+    pub ran: bool
 }

@@ -25,10 +25,14 @@ THE SOFTWARE.
 use crate::config;
 use crate::structs::Migration;
 
+use mysql::Error;
+use std::io::{stdout, Write};
+use crossterm::execute;
+use crossterm::style::{Color, Print, ResetColor, SetForegroundColor};
 use std::sync::Mutex;
 
 lazy_static! {
-    static ref CONNECTION: Mutex<Box<mysql::Conn>> = {
+    static ref CONNECTION: Mutex<mysql::Conn> = {
         let config = config::load().unwrap();
 
         let conn_url = format!(
@@ -38,40 +42,69 @@ lazy_static! {
             config.db
         );
 
-        Mutex::new(Box::new(mysql::Conn::new(conn_url).unwrap()))
+        let mut conn = mysql::Conn::new(conn_url).unwrap();
+
+        // backwards compatibility for bmig users
+        let _ = conn.query("rename table zzzzzbmigmigrations to rmig");
+
+        // add the rmig table in case it doesn't exist
+        let _ = conn.query("create table if not exists \
+            rmig ( \
+                name varchar(255) not null, \
+                primary key(name) \
+            )engine=innodb default charset=utf8");
+
+        Mutex::new(conn)
     };
 }
 
-fn init_connection() {
+pub fn query(query: String) {
     let conn = &mut CONNECTION.lock().unwrap();
 
-    // backwards compatibility for bmig users
-    let _ = conn.query("rename table zzzzzbmigmigrations to rmig");
+    let result = conn.query(query);
 
-    // add the rmig table in case it doesn't exist
-    let _ = conn.query("create table if not exists \
-        rmig ( \
-            name varchar(255) not null, \
-            primary key(name) \
-        )engine=innodb default charset=utf8");
+    match result {
+        Err(e) => {
+            match e {
+                Error::MySqlError(e) => {
+                    let _ = execute!(
+                        stdout(),
+                        SetForegroundColor(Color::Red),
+                        Print("error: "),
+                        ResetColor,
+                        Print(e.message),
+                        Print("\n")
+                    );
+                },
+                _ => {
+                    let _ = execute!(
+                        stdout(),
+                        SetForegroundColor(Color::Red),
+                        Print("unknown error"),
+                        ResetColor,
+                        Print("\n")
+                    );
+                }
+            }
+        },
+        _ => {}
+    };
 }
 
-pub fn query(query: String) -> Vec<Migration> {
-    init_connection();
-
+pub fn get_migration_list() -> Vec<Migration> {
     let conn = &mut CONNECTION.lock().unwrap();
 
     // query and map results into a vec of migrations
     let migrations: Vec<Migration> =
         conn
-            .query(query)
+            .query("select * from rmig")
             .map(|result| {
                 result
                     .map(|x| x.unwrap())
                     .map(|row| {
                         let name = mysql::from_row(row);
 
-                        Migration { name }
+                        Migration { name, ran: true }
                     })
                     .collect()
             })

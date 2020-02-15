@@ -22,52 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ***/
 
-use std::process;
-
-use crate::config;
-use crate::drivers::mysql;
-use crate::structs::Config;
-use crate::structs::Migration;
-
-// process a normal query
-pub fn query(query: String) {
-    let config = get_config();
-
-    if config.platform == "mysql" {
-        mysql::query(query);
-        return
-    }
-}
-
-// get a list of local migrations compared with remote migrations
-pub fn get_migration_list() -> Vec<Migration> {
-    let config = get_config();
-
-    if config.platform == "mysql" {
-        return mysql::get_migration_list();
-    }
-
-    Vec::new()
-}
-
-// insert a new migration by name
-pub fn add_migration(name: String) {
-    let config = get_config();
-
-}
-
-// delete an existing migration by name
-pub fn remove_migration(name: String) {
-    let config = get_config();
-
-}
-
-fn get_config() -> Config {
-    if !config::exists() {
-        println!("you must generate a config file first");
-        println!("use `rmig init` to do this");
-        process::exit(1);
-    }
-
-    config::load().unwrap()
+pub enum MigrationOperation {
+    Migrate,
+    Rollback
 }

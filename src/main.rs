@@ -35,7 +35,9 @@ use std::env;
 mod config;
 mod create;
 mod drivers;
+mod enums;
 mod init;
+mod migrations;
 mod status;
 mod structs;
 
@@ -53,7 +55,7 @@ fn main() {
 
     let mut force = false;
     let mut transaction = false;
-    let mut bail = false;
+    let mut all = false;
 
     for arg in &args {
         match command {
@@ -63,7 +65,10 @@ fn main() {
             },
             "migrate" => match arg.as_str() {
                 "-t" => transaction = true,
-                "-b" => bail = true,
+                _ => {}
+            },
+            "rollback" => match arg.as_str() {
+                "-a" => all = true,
                 _ => {}
             },
             _ => {}
@@ -73,13 +78,15 @@ fn main() {
     let flags = structs::Flags {
         force,
         transaction,
-        bail
+        all
     };
 
     match command {
         "init" => init::handle(flags),
         "status" => status::handle(),
         "create" => create::handle(args),
+        "migrate" => migrations::handle(flags, enums::MigrationOperation::Migrate),
+        "rollback" => migrations::handle(flags, enums::MigrationOperation::Rollback),
         _ => menu()
     }
 

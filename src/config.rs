@@ -43,7 +43,14 @@ pub fn load() -> Result<Config, &'static str> {
             process::exit(1);
         });
 
-    let config: Config = serde_json::from_str(&contents).unwrap();
+    let config: Config = serde_json::from_str(&contents)
+        .unwrap_or_else(|_| {
+            println!("problem parsing config, most commonly because the json is invalid");
+            println!("this can be fixed by either:");
+            println!("  a) manually fixing the config.json and making it valid");
+            println!("  b) running `rmig init -f` to generate a new config");
+            process::exit(1);
+        });
 
     Ok(config)
 }

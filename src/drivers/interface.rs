@@ -54,20 +54,38 @@ pub fn get_migration_list() -> Vec<Migration> {
 pub fn add_migration(name: String) {
     let config = get_config();
 
+    if config.platform == "mysql" {
+        return mysql::query(format!("insert into rmig values ('{}')", name));
+    }
 }
 
 // delete an existing migration by name
 pub fn remove_migration(name: String) {
     let config = get_config();
 
+    if config.platform == "mysql" {
+        return mysql::query(format!("delete from rmig where name = '{}'", name));
+    }
 }
 
 fn get_config() -> Config {
+    // check for config available
     if !config::exists() {
         println!("you must generate a config file first");
         println!("use `rmig init` to do this");
         process::exit(1);
     }
 
-    config::load().unwrap()
+    let config = config::load().unwrap();
+
+    // verify platform is valid
+    let valid_platforms = vec!["mysql"];
+
+    if !valid_platforms.contains(&config.platform.as_str()) {
+        println!("platform `{}` not supported by rmig", config.platform);
+        println!("currently supported platforms: mysql");
+        process::exit(1);
+    }
+
+    config
 }

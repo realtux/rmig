@@ -34,12 +34,29 @@ use crate::structs::Flags;
 use crate::drivers::interface;
 
 pub fn handle(flags: Flags, op: MigrationOperation) {
-    let migrations = status::migration_status();
+    let mut migrations = status::migration_status();
+
+    let mut migrations_ran = 0;
+
+    // for rollback, reverse the order
+    if let MigrationOperation::Rollback = op {
+        migrations.reverse();
+    }
 
     for migration in migrations {
-        if migration.ran {
-            continue;
+        if let MigrationOperation::Migrate = op {
+            if migration.ran {
+                continue;
+            }
         }
+
+        if let MigrationOperation::Rollback = op {
+            if !migration.ran {
+                continue;
+            }
+        }
+
+        migrations_ran += 1;
 
         // handles -f flag
         if flags.transaction {
@@ -167,5 +184,26 @@ pub fn handle(flags: Flags, op: MigrationOperation) {
         if flags.transaction {
             interface::query("commit".to_string());
         }
+
+        match op {
+            MigrationOperation::Migrate =>
+                interface::add_migration(migration.name),
+            MigrationOperation::Rollback =>
+                interface::remove_migration(migration.name),
+        };
+
+        // for rollback, at the moment, stop after the first one
+        if let MigrationOperation::Rollback = op {
+            break;
+        }
+    }
+
+    if migrations_ran == 0 {
+        match op {
+            MigrationOperation::Migrate =>
+                println!("all migrations are already applied"),
+            MigrationOperation::Rollback =>
+                println!("all migrations are already removed"),
+        };
     }
 }

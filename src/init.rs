@@ -68,6 +68,7 @@ pub fn handle(flags: Flags) {
 
     println!("database platform:");
     println!("  [1] mysql");
+    println!("  [2] postgres");
     println!("");
     print!("choice [1]: ");
     let _ = stdout().flush();
@@ -77,6 +78,7 @@ pub fn handle(flags: Flags) {
         Ok(platform) => {
             match platform {
                 1 => "mysql",
+                2 => "postgres",
                 _ => "mysql"
             }
         },

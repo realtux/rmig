@@ -31,6 +31,18 @@ rmig init
 this will ask you a few questions and create a `config.json` file in the current directory as long
 as one doesn't already exist. if one already exists, rmig will say so and the program will exit.
 
+***generated json***
+```json
+{
+  "host": "localhost",
+  "port": 3306,
+  "user": "root",
+  "pass": "root",
+  "db": "mydb",
+  "platform": "mysql"
+}
+```
+
 #
 
 ### create a new migration

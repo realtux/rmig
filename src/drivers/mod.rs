@@ -25,3 +25,4 @@ THE SOFTWARE.
 pub mod interface;
 
 mod mysql;
+mod postgres;

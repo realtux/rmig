@@ -26,6 +26,7 @@ use std::process;
 
 use crate::config;
 use crate::drivers::mysql;
+use crate::drivers::postgres;
 use crate::structs::Config;
 use crate::structs::Migration;
 
@@ -33,39 +34,44 @@ use crate::structs::Migration;
 pub fn query(query: String) {
     let config = get_config();
 
-    if config.platform == "mysql" {
-        mysql::query(query);
-        return
-    }
+    match config.platform.as_str() {
+        "mysql" => mysql::query(query),
+        "postgres" => postgres::query(query),
+        _ => {}
+    };
 }
 
 // get a list of local migrations compared with remote migrations
 pub fn get_migration_list() -> Vec<Migration> {
     let config = get_config();
 
-    if config.platform == "mysql" {
-        return mysql::get_migration_list();
+    match config.platform.as_str() {
+        "mysql" => mysql::get_migration_list(),
+        "postgres" => postgres::get_migration_list(),
+        _ => Vec::new()
     }
-
-    Vec::new()
 }
 
 // insert a new migration by name
 pub fn add_migration(name: String) {
     let config = get_config();
 
-    if config.platform == "mysql" {
-        return mysql::query(format!("insert into rmig values ('{}')", name));
-    }
+    match config.platform.as_str() {
+        "mysql" => mysql::query(format!("insert into rmig values ('{}')", name)),
+        "postgres" => postgres::query(format!("insert into rmig values ('{}')", name)),
+        _ => {}
+    };
 }
 
 // delete an existing migration by name
 pub fn remove_migration(name: String) {
     let config = get_config();
 
-    if config.platform == "mysql" {
-        return mysql::query(format!("delete from rmig where name = '{}'", name));
-    }
+    match config.platform.as_str() {
+        "mysql" => mysql::query(format!("delete from rmig where name = '{}'", name)),
+        "postgres" => postgres::query(format!("delete from rmig where name = '{}'", name)),
+        _ => {}
+    };
 }
 
 fn get_config() -> Config {
@@ -79,7 +85,7 @@ fn get_config() -> Config {
     let config = config::load().unwrap();
 
     // verify platform is valid
-    let valid_platforms = vec!["mysql"];
+    let valid_platforms = vec!["mysql", "postgres"];
 
     if !valid_platforms.contains(&config.platform.as_str()) {
         println!("platform `{}` not supported by rmig", config.platform);

@@ -7,7 +7,7 @@ this project, like the previous one, aims to be a generic database migrations ma
 
 #
 
-### installation
+## installation
 
 in general, see releases to download the binary for your platform. if you want to compile on your own,
 make sure you're using at least `1.41.0` of the rust toolchain.
@@ -22,9 +22,9 @@ then do something with `target/release/rmig`.
 
 #
 
-### rmig commands
+## rmig commands
 
-#### initialize rmig
+### initialize rmig
 ```
 rmig init
 ```
@@ -37,7 +37,7 @@ as one doesn't already exist. if one already exists, rmig will say so and the pr
 
 #
 
-#### create a new migration
+### create a new migration
 ```
 rmig create [name]
 ```
@@ -50,7 +50,7 @@ the migration, or leave it blank; either way is fine.
 
 #
 
-#### check the status of each migration
+### check the status of each migration
 ```
 rmig status
 ```
@@ -61,7 +61,7 @@ migrations that are not will be marked as `dn`. a count of pending migrations wi
 
 #
 
-#### apply all pending migrations
+### apply all pending migrations
 ```
 rmig migrate
 ```
@@ -71,7 +71,7 @@ they will be ran sequentially starting with the oldest.
 
 #
 
-#### rolling back migrations
+### rolling back migrations
 ```
 rmig rollback
 ```

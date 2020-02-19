@@ -28,7 +28,7 @@ then do something with `target/release/rmig`.
 ```
 rmig init
 ```
-**options**
+***options***
 
 `-f` force init and overwrite `config.json` if it exists
 

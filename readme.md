@@ -5,7 +5,7 @@ mysql migrations.
 it shores up any lingering problems from the previous project and builds upon it with newer features.
 this project, like the previous one, aims to be a generic database migrations manager which will support several platforms, but mysql at first.
 
----
+#
 
 ### installation
 
@@ -20,17 +20,22 @@ cargo build --release
 
 then do something with `target/release/rmig`.
 
+#
+
 ### rmig commands
 
 #### initialize rmig
 ```
 rmig init
 ```
-*options*
+**options**
+
 `-f` force init and overwrite `config.json` if it exists
 
 this will ask you a few questions and create a `config.json` file in the current directory as long
 as one doesn't already exist. if one already exists, rmig will say so and the program will exit.
+
+#
 
 #### create a new migration
 ```
@@ -43,6 +48,8 @@ it will contain an `up:` and `down:` label. there must be a newline after each l
 after each command you write. if you don't have an `up` or a `down`, you can leave the label out of
 the migration, or leave it blank; either way is fine.
 
+#
+
 #### check the status of each migration
 ```
 rmig status
@@ -52,6 +59,8 @@ and compare that against what is in the `rmig` table that `rmig` will create in 
 beginning. migrations that are present in the table will be marked as `up` and
 migrations that are not will be marked as `dn`. a count of pending migrations will be shown.
 
+#
+
 #### apply all pending migrations
 ```
 rmig migrate
@@ -60,6 +69,8 @@ this will run each migration marked as `dn` from `rmig status` and execute the c
 the `up:` label located in that migration. if multiple migrations are marked as `dn`,
 they will be ran sequentially starting with the oldest.
 
+#
+
 #### rolling back migrations
 ```
 rmig rollback
@@ -67,6 +78,8 @@ rmig rollback
 this will rollback each migration marked as `up` from `rmig status` and execute
 the contents from the `down:` label located in that migration. by default, only the most
 recently migration will be rolled back.
+
+#
 
 ### license
 

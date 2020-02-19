@@ -24,12 +24,12 @@ then do something with `target/release/rmig`.
 ```
 rmig init
 ```
+this will ask you a few questions and create a `config.json` file in the current directory as long
+as one doesn't already exist. if one already exists, rmig will say so and the program will exit.
+
 ***options***
 
 `-f` force init and overwrite `config.json` if it exists
-
-this will ask you a few questions and create a `config.json` file in the current directory as long
-as one doesn't already exist. if one already exists, rmig will say so and the program will exit.
 
 ***generated json***
 ```json
@@ -42,6 +42,7 @@ as one doesn't already exist. if one already exists, rmig will say so and the pr
   "platform": "mysql"
 }
 ```
+your data will vary according to what you've put in either manually or via `rmig init`.
 
 #
 

@@ -35,19 +35,43 @@ lazy_static! {
     static ref CONNECTION: Mutex<postgres::Client> = {
         let config = config::load().unwrap();
 
-        let conn_url = format!("host={} user={}", config.host, config.user);
+        let _ = execute!(
+            stdout(),
+            SetForegroundColor(Color::Cyan),
+            Print("driver: "),
+            ResetColor,
+            Print(&config.platform),
+            Print(" "),
+            SetForegroundColor(Color::Cyan),
+            Print("endpoint: "),
+            ResetColor,
+            Print(&config.user),
+            Print("@"),
+            Print(&config.host),
+            Print("/"),
+            Print(&config.db),
+            ResetColor,
+            Print("\n")
+        );
+
+        let conn_url = format!(
+            "postgresql://{}:{}@{}:{}/{}",
+            config.user, config.pass,
+            config.host, config.port,
+            config.db
+        );
 
         let mut conn = Client::connect(&conn_url, NoTls).unwrap();
 
         // backwards compatibility for bmig users
-        let _ = conn.query("rename table zzzzzbmigmigrations to rmig", &[]);
+        let _ = conn.query("alter table zzzzzbmigmigrations rename to rmig", &[]);
 
         // add the rmig table in case it doesn't exist
         let _ = conn.query("create table if not exists \
             rmig ( \
                 name varchar(255) not null, \
                 primary key(name) \
-            )engine=innodb default charset=utf8", &[]);
+            );", &[]);
 
         Mutex::new(conn)
     };
@@ -69,15 +93,7 @@ pub fn query(query: String) {
                 Print("\n")
             );
         },
-        _ => {
-            let _ = execute!(
-                stdout(),
-                SetForegroundColor(Color::Red),
-                Print("unknown error"),
-                ResetColor,
-                Print("\n")
-            );
-        }
+        _ => { }
     };
 }
 

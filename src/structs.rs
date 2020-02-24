@@ -37,15 +37,15 @@ pub struct Flags {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
+    pub platform: String,
     pub host: String,
     pub port: i32,
     pub user: String,
     pub pass: String,
     pub db: String,
-    pub platform: String
 }
 
 pub struct Migration {
     pub name: String,
-    pub ran: bool
+    pub ran: bool,
 }

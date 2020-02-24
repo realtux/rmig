@@ -35,6 +35,25 @@ lazy_static! {
     static ref CONNECTION: Mutex<mysql::Conn> = {
         let config = config::load().unwrap();
 
+        let _ = execute!(
+            stdout(),
+            SetForegroundColor(Color::Cyan),
+            Print("driver: "),
+            ResetColor,
+            Print(&config.platform),
+            Print(" "),
+            SetForegroundColor(Color::Cyan),
+            Print("endpoint: "),
+            ResetColor,
+            Print(&config.user),
+            Print("@"),
+            Print(&config.host),
+            Print("/"),
+            Print(&config.db),
+            ResetColor,
+            Print("\n")
+        );
+
         let conn_url = format!(
             "mysql://{}:{}@{}:{}/{}",
             config.user, config.pass,

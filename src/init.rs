@@ -42,30 +42,6 @@ pub fn handle(flags: Flags) {
         }
     }
 
-    print!("host [localhost]: ");
-    let _ = stdout().flush();
-    let host: String = read!("{}\n");
-
-    print!("port [3306]: ");
-    let _ = stdout().flush();
-    let port: String = read!("{}\n");
-    let port: i32 = match port.parse::<i32>() {
-        Ok(p) => p,
-        _ => 3306
-    };
-
-    print!("database username [root]: ");
-    let _ = stdout().flush();
-    let user: String = read!("{}\n");
-
-    print!("database password [root]: ");
-    let _ = stdout().flush();
-    let pass: String = read!("{}\n");
-
-    print!("database name: ");
-    let _ = stdout().flush();
-    let db: String = read!("{}\n");
-
     println!("database platform:");
     println!("  [1] mysql");
     println!("  [2] postgres");
@@ -85,6 +61,36 @@ pub fn handle(flags: Flags) {
         _ => "mysql"
     };
     let platform: String = platform.to_string();
+
+    print!("host [localhost]: ");
+    let _ = stdout().flush();
+    let host: String = read!("{}\n");
+
+    let default_port = match platform.as_str() {
+        "mysql" => 3306,
+        "postgres" => 5432,
+        _ => 3306
+    };
+
+    print!("port [{}]: ", default_port);
+    let _ = stdout().flush();
+    let port: String = read!("{}\n");
+    let port: i32 = match port.parse::<i32>() {
+        Ok(p) => p,
+        _ => default_port
+    };
+
+    print!("database username [root]: ");
+    let _ = stdout().flush();
+    let user: String = read!("{}\n");
+
+    print!("database password [root]: ");
+    let _ = stdout().flush();
+    let pass: String = read!("{}\n");
+
+    print!("database name: ");
+    let _ = stdout().flush();
+    let db: String = read!("{}\n");
 
     let mut config = Config { host, port, user, pass, db, platform };
 

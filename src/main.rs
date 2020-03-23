@@ -88,7 +88,7 @@ fn main() {
         "migrate" => migrations::handle(flags, enums::MigrationOperation::Migrate),
         "rollback" => migrations::handle(flags, enums::MigrationOperation::Rollback),
         _ => menu()
-    }
+    };
 
     println!("");
 }

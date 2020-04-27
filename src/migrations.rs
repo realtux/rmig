@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ***/
 
+use std::str;
 use std::fs::File;
 use std::io::Read;
 use std::io::{stdout, Write};
@@ -122,49 +123,67 @@ pub fn handle(flags: Flags, op: MigrationOperation) {
         // a newline on every line
         queries.push('\n');
 
+        let queries = queries.as_bytes();
+
         // process out discrete queries that need to be ran
         let mut queries_to_execute: Vec<String> = Vec::new();
-        let mut temp = String::new();
+        let mut temp: Vec<u8> = Vec::new();
 
-        let mut delimiter = ';';
+        let mut delimiter = b';';
         let mut delimiter_check = true;
 
-        for (idx, c) in queries.chars().enumerate() {
+        let mut idx = 0;
+        while idx < queries.len() {
             // at the beginning of each line, check for delimiter directive
             if delimiter_check {
                 delimiter_check = false;
 
-                let test = &queries[idx..];
+                let test = str::from_utf8(&queries[idx..]).unwrap();
 
-                if test.to_lowercase().starts_with("delimiter") {
-                    delimiter = queries[idx+10..].chars().next().unwrap();
+                if test.to_lowercase().starts_with("delimiter ") {
+                    delimiter = queries[idx+10];
+
+                    // pushed past this line
+                    idx += 11;
+                    continue;
                 }
             }
 
-            if c == '\n' {
+            if queries[idx] == b'\n' {
                 delimiter_check = true;
             }
 
             // last iteration, bail
             if idx == queries.len() - 1 {
-                temp.push(c);
-                if !temp.trim().is_empty() {
-                    queries_to_execute.push(temp.trim().to_string());
+                temp.push(queries[idx]);
+
+                let temp_string = str::from_utf8(&temp).unwrap();
+
+                if !temp_string.trim().is_empty() {
+                    queries_to_execute.push(temp_string.trim().to_string());
                 }
+
                 break;
             }
 
-            let next_char = queries[idx+1..].chars().next().unwrap();
+            let next_char = queries[idx+1];
 
             // check for ending query condition
-            if idx < queries.len() - 1 && c == delimiter && next_char == '\n' {
-                temp.push(delimiter);
-                queries_to_execute.push(temp.trim().to_string());
+            if idx < queries.len() - 1 && queries[idx] == delimiter && next_char == b'\n' {
+                temp.push(b';');
+
+                let temp_string = str::from_utf8(&temp).unwrap();
+
+                queries_to_execute.push(temp_string.trim().to_string());
+
                 temp.clear();
+                idx += 1;
                 continue;
             }
 
-            temp.push(c);
+            temp.push(queries[idx]);
+
+            idx += 1;
         }
 
         for query in queries_to_execute {

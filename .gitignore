@@ -3,3 +3,5 @@ migrations/*.sql
 /target
 **/*.rs.bk
 /*.json
+deps/*
+!deps/.gitkeep

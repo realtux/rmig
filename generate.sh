@@ -2,7 +2,7 @@
 
 # linux deps:
 # none
-cargo build --release --target x86_64-unknown-linux-gnu
+cargo build --release --target x86_64-unknown-linux-musl
 
 # windows deps:
 # rustup target add x86_64-pc-windows-gnu

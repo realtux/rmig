@@ -1,4 +1,4 @@
-# rmig 0.0.1 by [tux](https://github.com/realtux)
+# rmig 0.0.3 by [tux](https://github.com/realtux)
 
 rmig is a re-implementation (and re-imagination) of an [old c project](https://github.com/realtux/bmig) which handled
 mysql migrations.
@@ -8,7 +8,7 @@ this project, like the previous one, aims to be a generic database migrations ma
 ## installation
 
 in general, see releases to download the binary for your platform. if you want to compile on your own,
-make sure you're using at least `1.41.0` of the rust toolchain.
+make sure you're using at least `1.46.0` of the rust toolchain.
 
 ```
 git clone https://github.com/realtux/rmig

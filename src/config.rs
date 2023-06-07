@@ -23,36 +23,70 @@ THE SOFTWARE.
 ***/
 
 use std::process;
+use std::path::Path;
+use std::env;
 use std::fs::File;
 use std::io::Read;
 
 use crate::structs::Config;
 
 pub fn load() -> Result<Config, &'static str> {
-    let mut handle = File::open("config.json")
-        .unwrap_or_else(|_| {
-            println!("config file not found, use `rmig init` to make one");
-            process::exit(1);
-        });
+    let exists = Path::new("config.json").exists();
 
-    let mut contents = String::new();
+    if exists {
+        let mut handle = File::open("config.json")
+            .unwrap_or_else(|_| {
+                println!("config file not found, use `rmig init` to make one");
+                process::exit(1);
+            });
 
-    handle.read_to_string(&mut contents)
-        .unwrap_or_else(|_| {
-            println!("problem parsing config, recommend `rmig init -f` to redo");
-            process::exit(1);
-        });
+        let mut contents = String::new();
 
-    let config: Config = serde_json::from_str(&contents)
-        .unwrap_or_else(|_| {
-            println!("problem parsing config, most commonly because the json is invalid");
-            println!("this can be fixed by either:");
-            println!("  a) manually fixing the config.json and making it valid");
-            println!("  b) running `rmig init -f` to generate a new config");
-            process::exit(1);
-        });
+        handle.read_to_string(&mut contents)
+            .unwrap_or_else(|_| {
+                println!("problem parsing config, recommend `rmig init -f` to redo");
+                process::exit(1);
+            });
 
-    Ok(config)
+        let config: Config = serde_json::from_str(&contents)
+            .unwrap_or_else(|_| {
+                println!("problem parsing config, most commonly because the json is invalid");
+                println!("this can be fixed by either:");
+                println!("  a) manually fixing the config.json and making it valid");
+                println!("  b) running `rmig init -f` to generate a new config");
+                process::exit(1);
+            });
+
+        return Ok(config);
+    } else {
+        let config = Config {
+            platform: get_env_string("RMIG_PLATFORM"),
+            host: get_env_string("RMIG_HOST"),
+            port: get_env_int("RMIG_PORT"),
+            user: get_env_string("RMIG_USER"),
+            pass: get_env_string("RMIG_PASS"),
+            db: get_env_string("RMIG_DB"),
+        };
+
+        return Ok(config);
+    }
+}
+
+pub fn get_env_string(name: &str) -> String {
+    match env::var(name) {
+        Ok(val) => val,
+        Err(_) => "".to_string()
+    }
+}
+
+pub fn get_env_int(name: &str) -> i32 {
+    match env::var(name) {
+        Ok(val) => match val.parse::<i32>() {
+            Ok(val) => val,
+            Err(_) => 0
+        },
+        Err(_) => 0
+    }
 }
 
 pub fn exists() -> bool {

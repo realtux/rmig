@@ -61,7 +61,10 @@ lazy_static! {
             config.db
         );
 
-        let mut conn = mysql::Conn::new(conn_url).unwrap();
+        let mut conn = match mysql::Conn::new(conn_url) {
+            Ok(c) => c,
+            Err(_) => panic!("failed to connect to database")
+        };
 
         // backwards compatibility for bmig users
         let _ = conn.query("rename table zzzzzbmigmigrations to rmig");

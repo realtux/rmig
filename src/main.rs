@@ -42,7 +42,7 @@ mod status;
 mod structs;
 
 fn main() {
-    println!("rmig 0.0.1 by tux");
+    println!("rmig 0.0.4 by tux");
 
     let args: Vec<String> = env::args().collect();
 

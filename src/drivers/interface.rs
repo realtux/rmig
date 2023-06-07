@@ -75,13 +75,6 @@ pub fn remove_migration(name: String) {
 }
 
 fn get_config() -> Config {
-    // check for config available
-    if !config::exists() {
-        println!("you must generate a config file first");
-        println!("use `rmig init` to do this");
-        process::exit(1);
-    }
-
     let config = config::load().unwrap();
 
     // verify platform is valid

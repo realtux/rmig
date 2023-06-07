@@ -1,4 +1,4 @@
-# rmig 0.0.3 by [tux](https://github.com/realtux)
+# rmig 0.0.4 by [tux](https://github.com/realtux)
 
 rmig is a re-implementation (and re-imagination) of an [old c project](https://github.com/realtux/bmig) which handled
 mysql migrations.
@@ -17,6 +17,26 @@ cargo build --release
 ```
 
 then do something with `target/release/rmig`.
+
+## configuration
+
+configuration can be done with `rmig init` to generate a `config.json`. alternatively, rmig can read from your environment
+for relevant details. those environment variables are as follows:
+
+```
+RMIG_PLATFORM
+RMIG_HOST
+RMIG_PORT
+RMIG_USER
+RMIG_PASS
+RMIG_DB
+```
+
+this option is very useful when config consolidation is important or configuration is done with `.env` files,
+docker environment, or docker compose files.
+
+please note that `config.json` won't be combined with your environment. if `config.json` exists, rmig will use
+that first, other it will fall back to environment variables.
 
 ## rmig commands
 

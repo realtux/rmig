@@ -5,3 +5,4 @@ migrations/*.sql
 /*.json
 dist/*
 !dist/.gitkeep
+Cargo.lock

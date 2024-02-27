@@ -24,7 +24,7 @@ configuration can be done with `rmig init` to generate a `config.json`. alternat
 for relevant details. those environment variables are as follows:
 
 ```
-RMIG_PLATFORM
+RMIG_DRIVER
 RMIG_HOST
 RMIG_PORT
 RMIG_USER
